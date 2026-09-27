@@ -28,5 +28,150 @@ Error generating stack: `+u.message+`
 </script>
   <script>(function(){function m(a){var h=a.getAttribute("href");if(!h)return;try{var u=new URL(h,document.baseURI);if((u.protocol==="http:"||u.protocol==="https:")&&u.host!==location.host){a.target="_blank";a.rel="noopener noreferrer";}}catch(e){}}function s(){document.querySelectorAll("a[href]").forEach(m);}if(document.readyState!=="loading"){s();}else{document.addEventListener("DOMContentLoaded",s);}document.addEventListener("click",function(e){var a=e.target&&e.target.closest&&e.target.closest("a[href]");if(a){m(a);}},true);})();</script>
   
+<script>
+/* TheGirlSavedByGrace waitlist wiring (added 2026-09-27).
+   The original page markup and bundle above are untouched. This script layers
+   real signup behavior on top of the existing Join button.
+   Owner setup (only step 1 is required):
+     1. Create a free form at https://formspree.io and paste the endpoint ID into FORMSPREE_FORM_ID.
+     2. Paste the Cloudflare Web Analytics token into CF_BEACON_TOKEN to count visitors.
+     3. Put a contact address in CONTACT_EMAIL to show it in the privacy note. */
+(function () {
+  "use strict";
+
+  var FORMSPREE_FORM_ID = "YOUR_FORM_ID";
+  var CF_BEACON_TOKEN = "";
+  var CONTACT_EMAIL = "";
+
+  var ENDPOINT = "https://formspree.io/f/" + FORMSPREE_FORM_ID;
+  var READY = FORMSPREE_FORM_ID !== "YOUR_FORM_ID";
+  var EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+
+  function styled(tag, style, text) {
+    var n = document.createElement(tag);
+    n.className = "instrument";
+    if (style) n.setAttribute("style", style);
+    if (text) n.textContent = text;
+    return n;
+  }
+
+  function init(input, btn) {
+    var row = btn.parentNode;
+
+    /* Honeypot: invisible to people, irresistible to bots. */
+    var trap = document.createElement("input");
+    trap.type = "text";
+    trap.name = "_gotcha";
+    trap.tabIndex = -1;
+    trap.autocomplete = "off";
+    trap.setAttribute("aria-hidden", "true");
+    trap.setAttribute("style", "position:absolute;left:-9999px;top:0;width:1px;height:1px;opacity:0;");
+    row.appendChild(trap);
+
+    /* 13+ confirmation, injected right under the email row. */
+    var ageWrap = styled("div", "margin-top:14px;display:flex;align-items:flex-start;gap:8px;font-size:13px;cursor:pointer;");
+    var ageBox = document.createElement("input");
+    ageBox.type = "checkbox";
+    ageBox.id = "tgsbg-age";
+    ageBox.setAttribute("style", "margin-top:3px;accent-color:#121212;");
+    var ageLabel = document.createElement("label");
+    ageLabel.setAttribute("for", "tgsbg-age");
+    ageLabel.textContent = "I confirm I am 13 or older";
+    ageWrap.appendChild(ageBox);
+    ageWrap.appendChild(ageLabel);
+
+    /* Privacy note, plain language. */
+    var privacy = styled("div", "margin-top:10px;font-size:12px;line-height:1.5;color:rgba(18,18,18,0.45);max-width:44ch;",
+      "We collect your email only to send early-access and community updates. Please do not sign up if you are under 13.");
+    if (CONTACT_EMAIL) {
+      privacy.appendChild(document.createTextNode(" Questions? Email "));
+      var mail = document.createElement("a");
+      mail.href = "mailto:" + CONTACT_EMAIL;
+      mail.textContent = CONTACT_EMAIL;
+      mail.setAttribute("style", "color:inherit;text-decoration:underline;");
+      privacy.appendChild(mail);
+      privacy.appendChild(document.createTextNode("."));
+    }
+
+    /* Error line, hidden until needed. */
+    var err = styled("div", "display:none;margin-top:10px;font-size:12px;color:#B3402E;");
+    err.setAttribute("role", "alert");
+
+    row.parentNode.insertBefore(ageWrap, row.nextSibling);
+    ageWrap.parentNode.insertBefore(privacy, ageWrap.nextSibling);
+    privacy.parentNode.insertBefore(err, privacy.nextSibling);
+
+    function showError(msg) { err.textContent = msg; err.style.display = "block"; }
+    function clearError() { err.textContent = ""; err.style.display = "none"; }
+
+    var letThrough = false;
+    btn.addEventListener("click", function (e) {
+      if (letThrough) { letThrough = false; return; } /* real success: hand back to the page's own UI */
+      e.preventDefault();
+      e.stopPropagation();
+      clearError();
+
+      if (trap.value) return; /* bot filled the honeypot: stay silent, send nothing */
+      var email = (input.value || "").trim();
+      if (!EMAIL_RE.test(email)) { showError("Please enter a valid email address."); input.focus(); return; }
+      if (!ageBox.checked) { showError("Please confirm you are 13 or older to join."); ageBox.focus(); return; }
+      if (!READY) { showError("Signup is not connected yet. The site owner needs to add the form ID."); return; }
+
+      btn.disabled = true;
+      var label = btn.textContent;
+      btn.textContent = "Joining...";
+
+      fetch(ENDPOINT, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "Accept": "application/json" },
+        body: JSON.stringify({ email: email, age_confirm: "yes", _subject: "New TheGirlSavedByGrace waitlist signup" })
+      })
+        .then(function (res) {
+          if (!res.ok) throw new Error("bad status");
+          return res.json().catch(function () { return {}; });
+        })
+        .then(function () {
+          clearError();
+          btn.disabled = false;
+          letThrough = true;
+          btn.click(); /* let the page show its own "You are in" state, now backed by a real signup */
+        })
+        .catch(function () {
+          showError("Something went wrong. Please try again.");
+          btn.disabled = false;
+          btn.textContent = label;
+        });
+    }, true);
+  }
+
+  /* Cloudflare Web Analytics: only loaded when the owner adds a token. */
+  if (CF_BEACON_TOKEN) {
+    var s = document.createElement("script");
+    s.defer = true;
+    s.src = "https://static.cloudflareinsights.com/beacon.min.js";
+    s.setAttribute("data-cf-beacon", JSON.stringify({ token: CF_BEACON_TOKEN }));
+    document.head.appendChild(s);
+  }
+
+  /* The page renders with React after load; poll until the form exists. */
+  var tries = 0;
+  var timer = setInterval(function () {
+    tries++;
+    var input = document.querySelector('input[placeholder="you at email dot com"]');
+    var btn = null;
+    if (input) {
+      /* Scope to the closing section so the nav and hero buttons are never hijacked. */
+      var scope = input.closest("section") || document;
+      var cands = scope.querySelectorAll("button");
+      for (var i = 0; i < cands.length; i++) {
+        if (/join the waitlist/i.test(cands[i].textContent)) { btn = cands[i]; break; }
+      }
+    }
+    if (input && btn) { clearInterval(timer); init(input, btn); }
+    else if (tries > 50) { clearInterval(timer); }
+  }, 200);
+})();
+</script>
+
 </body>
 </html>
