@@ -28,5 +28,101 @@ Error generating stack: `+u.message+`
 </script>
   <script>(function(){function m(a){var h=a.getAttribute("href");if(!h)return;try{var u=new URL(h,document.baseURI);if((u.protocol==="http:"||u.protocol==="https:")&&u.host!==location.host){a.target="_blank";a.rel="noopener noreferrer";}}catch(e){}}function s(){document.querySelectorAll("a[href]").forEach(m);}if(document.readyState!=="loading"){s();}else{document.addEventListener("DOMContentLoaded",s);}document.addEventListener("click",function(e){var a=e.target&&e.target.closest&&e.target.closest("a[href]");if(a){m(a);}},true);})();</script>
   
+<script>
+/* TheGirlSavedByGrace waitlist wiring (added 2026-09-27).
+   Makes the Join button submit to a real Formspree endpoint.
+   The React bundle above is untouched; this script layers real behavior on top.
+   Owner: create a free form at https://formspree.io and paste the endpoint ID below. */
+(function () {
+  var FORMSPREE_ENDPOINT = "https://formspree.io/f/YOUR_FORM_ID"; // <-- paste real form ID here
+  var READY = FORMSPREE_ENDPOINT.indexOf("YOUR_FORM_ID") === -1;
+  var EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+
+  function findParts() {
+    var input = document.querySelector('input[placeholder="you at email dot com"]');
+    var btn = null;
+    var buttons = document.querySelectorAll("button");
+    for (var i = 0; i < buttons.length; i++) {
+      if (/join the waitlist/i.test(buttons[i].textContent)) { btn = buttons[i]; break; }
+    }
+    if (!input || !btn) return null;
+    return { input: input, btn: btn };
+  }
+
+  function init(parts) {
+    var input = parts.input, btn = parts.btn;
+
+    // 1. Inject the 13+ checkbox row right under the email/button row.
+    var row = btn.closest("div");
+    var checkWrap = document.createElement("div");
+    checkWrap.className = "instrument";
+    checkWrap.setAttribute("style", "margin-top:14px;font-size:13px;display:flex;align-items:flex-start;gap:8px;");
+    checkWrap.innerHTML = '<input type="checkbox" id="tgsbg-age" style="margin-top:3px;accent-color:#121212;">' +
+      '<label for="tgsbg-age">I confirm I am 13 or older</label>';
+    row.parentNode.insertBefore(checkWrap, row.nextSibling);
+
+    // 2. Error line (hidden until needed).
+    var err = document.createElement("div");
+    err.className = "instrument";
+    err.setAttribute("style", "display:none;margin-top:10px;font-size:12px;color:#B3402E;");
+    err.setAttribute("role", "alert");
+    checkWrap.parentNode.insertBefore(err, checkWrap.nextSibling);
+
+    function showError(msg) {
+      err.textContent = msg;
+      err.style.display = "block";
+    }
+    function clearError() {
+      err.textContent = "";
+      err.style.display = "none";
+    }
+
+    // 3. Hijack the button: validate + submit for real, then let React flip its own UI.
+    var letThrough = false;
+    btn.addEventListener("click", function (e) {
+      if (letThrough) { letThrough = false; return; } // real success path: hand back to React
+      e.preventDefault();
+      e.stopPropagation();
+      clearError();
+
+      var email = (input.value || "").trim();
+      if (!EMAIL_RE.test(email)) { showError("Please enter a valid email address."); input.focus(); return; }
+      var ageBox = document.getElementById("tgsbg-age");
+      if (!ageBox.checked) { showError("Please confirm you are 13 or older to join."); ageBox.focus(); return; }
+      if (!READY) { showError("Signup is not connected yet. The site owner needs to add the form ID."); return; }
+
+      btn.disabled = true;
+      var label = btn.textContent;
+      btn.textContent = "Joining...";
+
+      fetch(FORMSPREE_ENDPOINT, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "Accept": "application/json" },
+        body: JSON.stringify({ email: email, age_confirm: "yes", _subject: "New TheGirlSavedByGrace waitlist signup" })
+      }).then(function (r) { return r.json().then(function (d) { return { ok: r.ok, d: d }; }); })
+        .then(function (res) {
+          if (!res.ok) throw new Error("bad response");
+          btn.disabled = false; // re-enable: disabled buttons do not fire click events
+          letThrough = true;    // next click passes through to React, which shows "You are in"
+          btn.click();
+        })
+        .catch(function () {
+          showError("Something went wrong. Please try again.");
+          btn.disabled = false;
+          btn.textContent = label;
+        });
+    }, true);
+  }
+
+  var tries = 0;
+  var timer = setInterval(function () {
+    var parts = findParts();
+    tries++;
+    if (parts) { clearInterval(timer); init(parts); }
+    else if (tries > 50) { clearInterval(timer); }
+  }, 200);
+})();
+</script>
+
 </body>
 </html>
