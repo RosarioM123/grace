@@ -1,0 +1,837 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="color-scheme" content="light dark" />
+    <link rel="icon" href="data:," />
+    <title>Grace AI Demo</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;0,6..72,700;1,6..72,400;1,6..72,500&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet" />
+    <style>
+      :root {
+        --bg: #ffffff;
+        --ink: #1d1d1b;
+        --muted: #5d5d58;
+        --line: #d8d8d2;
+        --accent: #166534;
+        --accent-ink: #14532d;
+        --accent-soft: #edf4ee;
+        --log-bg: #f4f4f0;
+        --crisis: #a4261f;
+        --crisis-bg: #fdf1ef;
+        --crisis-line: #c0564e;
+      }
+      @media (prefers-color-scheme: dark) {
+        :root {
+          --bg: #171716;
+          --ink: #ececea;
+          --muted: #a6a69f;
+          --line: #3a3a36;
+          --accent: #4c9a68;
+          --accent-ink: #8fcea6;
+          --accent-soft: #1e2b21;
+          --log-bg: #1f1f1d;
+          --crisis: #f09284;
+          --crisis-bg: #331d1a;
+          --crisis-line: #8a4a42;
+        }
+      }
+      * { box-sizing: border-box; }
+      body {
+        margin: 0;
+        background: var(--bg);
+        color: var(--ink);
+        font-family: "Newsreader", Georgia, serif;
+        font-size: 15px;
+        line-height: 1.55;
+        -webkit-font-smoothing: antialiased;
+      }
+      .wrap { max-width: 680px; margin: 0 auto; padding: 0 18px 56px; }
+      h1 { font-size: 26px; font-weight: 700; line-height: 1.2; margin: 8px 0 10px; }
+      h2 { font-size: 20px; font-weight: 700; line-height: 1.25; margin: 0 0 10px; }
+      h3 { font-size: 17px; font-weight: 700; line-height: 1.3; margin: 26px 0 6px; }
+      h4 { font-size: 15px; font-weight: 700; margin: 16px 0 3px; }
+      p { margin: 0 0 10px; }
+      a { color: var(--accent-ink); }
+      .mono { font-family: "IBM Plex Mono", ui-monospace, monospace; }
+      ol, ul { margin: 0 0 10px; padding-left: 22px; }
+      li { margin: 5px 0; }
+
+      header { padding-top: 28px; }
+      .status-line { font-family: "IBM Plex Mono", monospace; font-size: 12px; color: var(--muted); margin: 0; }
+
+      .tool { margin-top: 26px; }
+      label.feel-label { display: block; font-weight: 600; margin-bottom: 6px; }
+      textarea {
+        width: 100%; min-height: 92px; resize: vertical;
+        font: inherit; font-size: 15px; line-height: 1.5;
+        color: var(--ink); background: var(--bg);
+        border: 1px solid var(--line); border-radius: 4px; padding: 9px 11px;
+      }
+      textarea:focus { outline: 2px solid var(--accent); outline-offset: 1px; }
+      .hint { font-size: 14px; color: var(--crisis); min-height: 20px; margin: 3px 0 0; }
+      .samples { margin-top: 8px; }
+      .samples p { font-size: 13.5px; color: var(--muted); margin-bottom: 6px; }
+      .sample {
+        display: block; width: 100%; text-align: left; font: inherit; font-size: 13.5px; line-height: 1.45;
+        background: var(--bg); color: var(--ink);
+        border: 1px solid var(--line); border-radius: 4px;
+        padding: 7px 10px; margin-bottom: 6px; cursor: pointer;
+      }
+      .sample:hover { border-color: var(--accent); background: var(--accent-soft); }
+      .run-btn {
+        font: inherit; font-weight: 600; cursor: pointer;
+        background: var(--accent); color: #ffffff;
+        border: 1px solid var(--accent); border-radius: 4px;
+        padding: 7px 20px; margin-top: 6px; font-size: 15px;
+      }
+      @media (prefers-color-scheme: dark) { .run-btn { color: #10240f; background: #7cc493; border-color: #7cc493; } }
+      .run-btn:disabled { opacity: .55; cursor: wait; }
+      .how-note { font-size: 13.5px; color: var(--muted); margin-top: 8px; }
+
+      .readout { margin-top: 24px; }
+      .readout h2 { font-size: 17px; }
+      .log {
+        background: var(--log-bg); border: 1px solid var(--line); border-radius: 4px;
+        padding: 11px 13px; font-family: "IBM Plex Mono", monospace; font-size: 12.5px; line-height: 1.7;
+        overflow-wrap: anywhere;
+      }
+      .log .flag { color: var(--crisis); font-weight: 600; }
+      .log .dim { color: var(--muted); }
+      .log .mhead { margin-top: 8px; }
+      pre.code {
+        background: var(--log-bg); border: 1px solid var(--line); border-radius: 4px;
+        padding: 11px 13px; font-family: "IBM Plex Mono", monospace; font-size: 12.5px; line-height: 1.7;
+        overflow-x: auto; margin: 0 0 10px;
+      }
+      .wordlist { font-family: "IBM Plex Mono", monospace; font-size: 13px; line-height: 1.8; }
+
+      .response-zone { margin-top: 20px; }
+      .empty-note { color: var(--muted); font-size: 14.5px; border: 1px dashed var(--line); border-radius: 4px; padding: 11px 13px; }
+      .resp { border: 1px solid var(--line); border-radius: 4px; padding: 14px 16px; }
+      .rblock { margin-top: 13px; }
+      .rlabel { font-weight: 600; font-size: 14px; margin-bottom: 3px; }
+      .verse-text { font-style: italic; font-size: 16px; }
+      .verse-ref { font-size: 13px; color: var(--muted); }
+      .planned-note { font-size: 13px; color: var(--muted); margin-top: 5px; }
+      .override-row { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px; }
+      .obtn {
+        font: inherit; font-size: 13.5px; cursor: pointer;
+        background: var(--bg); color: var(--ink);
+        border: 1px solid var(--line); border-radius: 4px; padding: 4px 10px;
+      }
+      .obtn:hover { border-color: var(--accent); background: var(--accent-soft); }
+
+      .crisis-panel { border: 2px solid var(--crisis-line); background: var(--crisis-bg); border-radius: 4px; padding: 14px 16px; }
+      .crisis-panel h3 { margin: 0 0 6px; font-size: 19px; color: var(--crisis); }
+      .crisis-actions { margin: 12px 0; display: grid; gap: 7px; }
+      .cbtn {
+        display: block; text-align: center; text-decoration: none; font-weight: 600;
+        border-radius: 4px; padding: 11px 14px; font-size: 15px;
+      }
+      .cbtn-solid { background: var(--crisis); color: #ffffff; }
+      @media (prefers-color-scheme: dark) { .cbtn-solid { background: #d97a6d; color: #2a0f0c; } }
+      .cbtn-line { border: 1px solid var(--crisis-line); color: var(--crisis); background: transparent; }
+      .crisis-panel ul { margin: 5px 0 0; padding-left: 19px; }
+      .crisis-panel li { margin: 3px 0; }
+
+      .help-line { margin-top: 22px; font-size: 14px; }
+
+      .brief { margin-top: 44px; border-top: 2px solid var(--ink); padding-top: 20px; }
+      table.status, table.results { width: 100%; border-collapse: collapse; margin: 8px 0 12px; font-size: 14px; }
+      table.status th, table.status td, table.results th, table.results td { text-align: left; padding: 7px 9px 7px 0; border-bottom: 1px solid var(--line); vertical-align: top; }
+      table.status th, table.results th { font-weight: 600; font-size: 13px; }
+      table.status td.st { font-weight: 600; white-space: nowrap; }
+      table.results { font-size: 13px; }
+      table.results td.num { font-family: "IBM Plex Mono", monospace; font-size: 12.5px; white-space: nowrap; }
+      table.results td.words { font-family: "IBM Plex Mono", monospace; font-size: 12px; }
+      footer { margin-top: 40px; border-top: 1px solid var(--line); padding-top: 12px; font-size: 13px; color: var(--muted); }
+    </style>
+  </head>
+  <body>
+    <div class="wrap">
+
+      <header>
+        <p class="status-line">Working prototype. The system it demonstrates is planned, not built.</p>
+        <h1>Grace AI prototype</h1>
+        <p>Type how a teenager might actually write on a bad night, or a good one. The prototype reads the words, checks for crisis language before anything else, scores the feeling, checks the drafted reply before showing it, and writes one entry in a log. Every word that moved the score shows up in the readout under the box, with its weight next to it. Nothing is hidden.</p>
+        <p>TheGirlSavedByGrace has been running since January 2020. Rosario Medina started it when she was 14. The AI is the part she is asking the Alive Prize to fund. This page exists so a reviewer can test the idea instead of taking her word for it.</p>
+      </header>
+
+      <div class="tool" id="demo">
+        <label class="feel-label" for="feel-input">How are you feeling today?</label>
+        <textarea id="feel-input" rows="4" placeholder="Write it the way you would actually say it. School has been a lot lately and I feel like I am falling behind everyone, that kind of thing."></textarea>
+        <p class="hint" id="input-hint" role="alert"></p>
+        <div class="samples" id="sample-list">
+          <p>Five samples, if you would rather tap than type. The third one triggers the crisis protocol. The fifth one is meant to be hard to read, and the prototype says so instead of guessing.</p>
+        </div>
+        <button class="run-btn" id="analyze-btn" type="button">Run it</button>
+        <p class="how-note">It runs in your browser. Nothing you type is sent anywhere or kept.</p>
+      </div>
+
+      <div class="readout">
+        <h2>The readout</h2>
+        <div class="log" id="log" aria-live="polite">
+          <div><span class="dim">words read:</span> not run yet</div>
+          <div><span class="dim">input check:</span> not run yet</div>
+          <div><span class="dim">score:</span> not run yet</div>
+          <div><span class="dim">confidence:</span> not run yet</div>
+          <div><span class="dim">output check:</span> not run yet</div>
+          <div><span class="dim">route:</span> not run yet</div>
+          <div><span class="dim">theme:</span> not run yet</div>
+          <div><span class="dim">matching:</span> not run yet</div>
+          <div><span class="dim">log entry:</span> not run yet</div>
+          <div><span class="dim">time:</span> not run yet</div>
+        </div>
+        <p class="how-note">How the scoring works: I wrote the word list by hand, 140 words and 25 phrases, each with a weight, and the readout shows every match it used. The production system swaps the list for trained spaCy and NLTK models, and swaps the phrase check for two trained checks, one on the message coming in and one on the reply going out, both read against a written safety policy. Matching and the log entry are simulated here in the browser. The match score is kept in two parts, similarity and trust, and each run appends one log entry with a key that makes a retry harmless and a hash that chains to the entry before it. Nothing is sent to a server.</p>
+      </div>
+
+      <div class="response-zone" id="response-zone" aria-live="polite">
+        <div class="empty-note">What Grace would say back appears here.</div>
+      </div>
+
+      <p class="help-line"><strong>If you are struggling right now:</strong> call or text <a href="tel:988">988</a>, the Suicide and Crisis Lifeline, free and open all night. Or text HOME to <a href="sms:741741?body=HOME">741741</a> for the Crisis Text Line. This line sits on the page whether anything is flagged or not, on purpose. See the failure modes under "What could go wrong".</p>
+
+      <div class="brief" id="brief">
+        <h2>Technical brief</h2>
+        <p>TheGirlSavedByGrace is a faith-based mental health platform for teenagers and Gen Z. Rosario founded it in January 2020, when she was 14, after her own stretch of depression, anxiety, and loneliness, and after her Christian faith carried her through it. More than 200,000 teenagers in 100 countries have come through the platform since then.</p>
+        <p>The need is not abstract. 47% of Gen Z report mental health challenges, and youth suicide rose 62% from 2007 to 2021. Plenty of teenagers will type how they feel into a phone long before they say any of it out loud. Grace wants to be worth typing into.</p>
+
+        <h3>How I built this</h3>
+        <p>I built this demo in an evening, as one HTML file, so it can be hosted anywhere and read top to bottom. The word list is hand-written: 140 words and 25 phrases, each with a weight I picked, plus 31 crisis phrases that are checked before any scoring happens. The samples are written the way teens actually type, lower case and half finished, and nothing on this page phones home, because there is no server behind it and nothing typed here is kept.</p>
+
+        <h3>The word list</h3>
+        <p>These are real entries from the list, with the weights the prototype actually uses:</p>
+        <p class="wordlist">hopeless -3.1, worthless -3.2, lonely -2.7, anxious -2.5, numb -2.5, alone -2.2, tired -1.4, okay +0.7, calm +2.0, hopeful +2.4, grateful +2.6, blessed +2.8</p>
+        <p>Trade-off: a list I can read and defend line by line, instead of a model I cannot inspect. I gave up accuracy to get that. A list misses sarcasm, misses context, and misses every word I did not think of. That is the honest reason the production system uses trained spaCy and NLTK models, and the reason this page calls itself a prototype.</p>
+
+        <h3>The scoring code</h3>
+        <p>This is the actual step that scores one word, copied from the script at the bottom of this page:</p>
+        <pre class="code">// score one word: start from its weight,
+// then adjust for the word right before it
+if (BOOSTERS[prev]) val = base * BOOSTERS[prev];
+else if (DIMINISHERS[prev]) val = base * DIMINISHERS[prev];
+if (NEGATORS[prev] || NEGATORS[prev2]) val = val * -0.74;
+matches.push({ term: w, valence: val });
+themes[theme] = (themes[theme] || 0) + Math.abs(val);</pre>
+        <p>So "so tired" counts more than "tired", "kinda numb" counts less than "numb", and "not happy" flips sign instead of scoring as happy. The compound score is the sum of the matched weights, scaled: sum divided by the square root of sum squared plus 15, which keeps it between -1 and +1.</p>
+
+        <h3>What the samples produce</h3>
+        <p>Real outputs, from the code on this page. Run any sample above and the readout shows the same numbers.</p>
+        <table class="results">
+          <thead><tr><th scope="col">Sample</th><th scope="col">Score</th><th scope="col">Route</th><th scope="col">Theme</th><th scope="col">Words that counted</th></tr></thead>
+          <tbody>
+            <tr>
+              <td>"idk school is a lot rn. failed my math test..."</td>
+              <td class="num">-0.88</td>
+              <td>Heavy support, a person gets offered</td>
+              <td>Feeling like you are not enough</td>
+              <td class="words">failed -2.40, behind -1.70, worthless -3.20</td>
+            </tr>
+            <tr>
+              <td>"today was actually good?? prayed this morning..."</td>
+              <td class="num">+0.93</td>
+              <td>Encouragement, invitation to share the story</td>
+              <td>Gratitude and joy</td>
+              <td class="words">close to god +2.50, good +1.90, prayed +1.40, grateful +2.60, friends +1.50</td>
+            </tr>
+            <tr>
+              <td>"i dont want to be here anymore..."</td>
+              <td class="num">score set aside</td>
+              <td>Crisis protocol</td>
+              <td>A heavy sadness, under the flag</td>
+              <td class="words">pointless -2.90, plus crisis phrases "end it all" and "dont want to be here"</td>
+            </tr>
+            <tr>
+              <td>"can't sleep again. my chest feels tight..."</td>
+              <td class="num">-0.76</td>
+              <td>Heavy support, a person gets offered</td>
+              <td>A heavy sadness</td>
+              <td class="words">can't sleep -2.10, numb -2.50</td>
+            </tr>
+            <tr>
+              <td>"idk im fine i guess. kinda numb but also like grateful??"</td>
+              <td class="num">+0.30, mixed</td>
+              <td>Unsure, flagged for a person to read</td>
+              <td>No single theme trusted</td>
+              <td class="words">fine +0.60, numb -2.00, grateful +2.60 (positive +3.20 against negative -2.00)</td>
+            </tr>
+          </tbody>
+        </table>
+        <p>The fifth row is the honest one. The words point two ways at once, so the prototype reports low confidence instead of picking a side.</p>
+
+        <h3>How the system would work</h3>
+        <p>A teen writes in free text. There is no form to fill in and no score to game. Sentiment analysis reads the feeling as the words come in. If risk language shows up, the crisis protocol takes over and everything else waits: the teen sees 988 and the Crisis Text Line (text HOME to 741741) before any content, and the case moves toward a licensed professional with a same-day goal. When there is no crisis, the reply is picked from what the teen actually wrote. A testimony or video on the same theme. A verse or a prayer. One small coping step, sized to the day they are having. The demo at the top of this page runs that flow, with the word list standing in for the trained models.</p>
+        <p>The production plan: ReactJS for the front end, MySQL for storage, AWS EC2 to run it, spaCy and NLTK for the language work, and a matching step that connects a teen to a licensed mental health professional.</p>
+
+        <h3>The safety layer</h3>
+        <p>I run two separate checks, because one check has one way to fail and this system does not get to fail quietly. The first check reads the teen's message as it arrives and looks for risk language. The second reads the reply I drafted, before the teen sees it, and can block it. Both read against a written safety policy that names what counts as risk language and what a reply must do when it appears. A crisis flag overrides the personalized reply completely. Before a version ships, I run a set of crisis messages I wrote to try to break the first check. If it misses one, that version does not ship.</p>
+        <p>Trade-off: two checks cost time, and they will sometimes block a reply that was fine. I accept that. A blocked good reply is a small loss next to a bad reply reaching a teen at the wrong moment.</p>
+        <p>Failure mode: if the first check misses risk language anyway, the failure is contained two ways. The crisis numbers sit at the bottom of every page whether anything is flagged or not, and any run the scorer is unsure about is flagged for a person to read. A miss is bad. A miss with no backstop would be worse.</p>
+
+        <h3>Before anything ships</h3>
+        <p>I score five things separately before a release: sentiment accuracy, crisis recall, crisis false-positive rate, response safety, and latency. Each one has a threshold set ahead of time, with clinical reviewers in the room. One line over its threshold and the version does not ship, whatever the other four say. I have not set the threshold numbers yet, and I would rather leave the space open than invent them here.</p>
+        <p>Personalization follows the same discipline. A new way of picking content goes to a small group first and is measured against the current version on two things: whether teens stay with the reply, and whether teens who need a person actually reach one. If the numbers do not move, the change does not ship, however good it sounded in the meeting where I proposed it.</p>
+
+        <h3>How matching works</h3>
+        <p>I score a match in two parts, and I keep the parts separate so either one can be questioned. One side holds what the teen needs: what they are feeling, the language they use, faith preference, availability, urgency. The other side holds the professional: specialty, language, faith background, availability, verified credentials. The first part of the score is how close those two sides sit. The second part is trust, from verified credentials and how recent the verification is. A fast match to the wrong person is not a good match, so safety runs through this step instead of sitting at the end of it.</p>
+        <p>Trade-off: ranking on trust as well as closeness means the closest match on paper sometimes loses to a professional whose credentials I could verify more recently. I would rather be able to explain that choice than hide it inside one blended number.</p>
+        <p>Failure mode: if the match is wrong, the teen can ask for a different professional with one tap, and the request does not need a reason.</p>
+
+        <h3>The log</h3>
+        <p>Every interaction is written once, to a log that only appends. Every action carries a key generated for that action, so a retry sends nothing twice and matches nobody twice. Each entry holds a hash of the entry before it, so a later edit anywhere in the chain shows. I have built this shape before: WORLD, a system of mine, is a deterministic state engine on a SHA-256 hash-chained intent ledger, where every state change is checked against capacity, liquidity, and node-lock constraints before it commits, with a FastAPI dashboard for review. The Grace log reuses that chaining idea. The readout above writes an entry on each run and shows its key and its hashes, so the write-once behavior is visible here instead of just claimed.</p>
+        <p>Trade-off: an append-only log grows forever and makes deletion awkward, and deletion matters when the writer is a teenager. I keep the design anyway, with the retention question listed openly below, because a record I cannot quietly edit is the only kind worth trusting in a system like this.</p>
+
+        <h3>What could go wrong</h3>
+        <p><strong>Missing a crisis message.</strong> The worst failure this system has. The mitigations are the two checks, the red-team set before any release, crisis numbers visible on every page regardless of flags, and unsure runs going to a person. None of that makes the risk zero. It makes a miss survivable instead of silent.</p>
+        <p><strong>Matching a teen to the wrong professional.</strong> A bad match at a bad moment can close a teen off from help entirely. The trust part of the score, the one-tap change with no reason required, and crisis cases going to the front of the line are the mitigations I have. The weighting question underneath it is still open, and it is listed below rather than settled quietly here.</p>
+        <p><strong>Teens not trusting an AI with their feelings.</strong> A fair worry, and the one I can do the least about with engineering. What I can do: show the score's work, every word and weight, the way the readout above does. Keep a person in the loop whenever the score is low or the reading is unsure. And in this demo, keep nothing that anyone types.</p>
+        <p>One more failure mode, smaller but real: if the sentiment score is simply wrong, the teen gets content for the wrong feeling. That is why every reply on this page carries a row of buttons to pick a closer feeling by hand. Try it above. The reply changes, and the run is still logged with the original score.</p>
+
+        <h3>What I would build first, in order</h3>
+        <p>This is also the order the $100,000 would be spent in. Each step comes where it does because the next one needs it.</p>
+        <ol>
+          <li><strong>Crisis detection, as two trained checks.</strong> First because nothing else is allowed to reach a teen before this is live.</li>
+          <li><strong>Sentiment analysis on trained spaCy and NLTK models.</strong> Second because the reply and the match both key off the feeling it reads, and the hand-written list is the weakest part of the current design.</li>
+          <li><strong>The log, in production form.</strong> Third because matching writes records that must never duplicate, and that guarantee has to exist before real matches happen.</li>
+          <li><strong>Matching to licensed professionals.</strong> Last of the four because it needs the feeling, the safety checks, and the log all working first. Done means a teen in crisis can reach a professional the same day.</li>
+          <li><strong>Outcome tracking, and the small-group tests.</strong> Measuring whether replies helped only means something once the rest is running. Done means outcomes are followed across the network, not just visits counted, and more testimonies and professionals get added on evidence.</li>
+        </ol>
+
+        <h3>Open questions</h3>
+        <ul>
+          <li>Whether the crisis check should read the whole conversation or only the latest message. Reading everything catches a slow build. It also raises the false alarm rate. I have not decided.</li>
+          <li>Whether faith background should weigh more or less than specialty in a match. I will test both orders on the small group before choosing, instead of choosing now on instinct.</li>
+          <li>How long the log should keep a teen's words. Safety argues for keeping them. Trust argues for deleting them sooner. This one needs a clinical reviewer and a lawyer in the room, not just me.</li>
+        </ul>
+
+        <h3>What exists now, and what does not</h3>
+        <p>This part matters, so it is stated plainly.</p>
+        <table class="status">
+          <thead><tr><th scope="col">Part</th><th scope="col">Status</th><th scope="col">Notes</th></tr></thead>
+          <tbody>
+            <tr><td>The platform and its audience</td><td class="st">Built</td><td>Live since January 2020. Over 200,000 teenagers across 100 countries.</td></tr>
+            <tr><td>The Grace website</td><td class="st">Built</td><td>A static site, live today at the link below. It carries the content and the community. It has no backend and no AI yet.</td></tr>
+            <tr><td>This prototype</td><td class="st">Built</td><td>Runs on this page. The scoring, the routing, and the crisis protocol all work. The scorer is a hand-written word list, not a trained model.</td></tr>
+            <tr><td>Production sentiment analysis</td><td class="st">Planned</td><td>Trained spaCy and NLTK models replace the list. Second in the build order above.</td></tr>
+            <tr><td>Crisis detection at scale</td><td class="st">Planned</td><td>Two checks, one on the message and one on the reply, against a written safety policy, with a set of attack messages run before any release. First in the order.</td></tr>
+            <tr><td>Release scorecard</td><td class="st">Planned</td><td>Sentiment accuracy, crisis recall, crisis false-positive rate, response safety, and latency, scored separately. One line over its threshold blocks the release.</td></tr>
+            <tr><td>Matching to licensed professionals</td><td class="st">Planned</td><td>Two sides scored against each other, teen needs against professional profile, with a separate trust part from verified credentials and recency. Same day in a crisis. Fourth in the order.</td></tr>
+            <tr><td>Append-only log</td><td class="st">Planned</td><td>Every interaction written once, hash-chained like WORLD, with a key on every action so a retry never matches or messages twice. Third in the order.</td></tr>
+            <tr><td>Small-group testing of personalization</td><td class="st">Planned</td><td>Changes measured against the current version on a small group before they ship to everyone. Fifth in the order.</td></tr>
+          </tbody>
+        </table>
+
+        <h3>Who is building it</h3>
+        <p>Rosario is a sophomore at Fordham's Gabelli School of Business, B.S. Finance with a Computer Science minor, GPA 3.80, graduating December 2028. She builds the way she built Relay: write everything down, test everything, let the results decide.</p>
+        <p>Relay is an autonomous code-migration agent harness that runs on MongoDB Atlas. It keeps code history, dependency graphs, patches, test outputs, and error logs across long runs, and its agents generate a change, run the tests, read the failures, and change strategy based on what came back. Relay took 1st place at the MongoDB Harness Engineering and Model Wrangling Hackathon in New York City in September 2026. Python, MongoDB Atlas, SQLite.</p>
+        <p>Before that there was BACKED, a community investing platform built with a five-person team. 1st place at the Capital One Tech Summit Hackathon, May 2025.</p>
+        <p>At Willett Advisors, she taught herself to code in six weeks. Then she built an AI tool that cut her team's research time by 20%, about 8 to 10 hours a week, and automated portfolio data aggregation across more than 1,000 data points, cutting manual reporting time by 80%.</p>
+        <p>Recognition, briefly: NCWIT Aspirations in Computing Collegiate Award finalist, 1 of 80 picked from more than 5,000 applicants, sponsored by Amazon, Bank of America, and Qualcomm. A Grow with Google Scholarship. Hispanic Scholarship Fund support. The Most Powerful Women in Banking Young Women's Leadership Award. More than 50 scholarships and awards in total.</p>
+        <p>At nine, a drunk driver hit her and left her with a permanent physical disability. She did more than 520 strength training sessions over five years, twice a week, to relearn how to walk. Grace comes out of that. She knows what it costs to need help, and what it means when help actually shows up.</p>
+
+        <h3>Links</h3>
+        <p>The Grace site is at <a href="https://rosariom123.github.io/grace" target="_blank" rel="noopener">rosariom123.github.io/grace</a>. Her code is on <a href="https://github.com/RosarioM123" target="_blank" rel="noopener">GitHub</a>, she is on <a href="https://www.linkedin.com/in/rosariom123" target="_blank" rel="noopener">LinkedIn</a>, and the prize itself is at <a href="https://aliveprize.com/apply" target="_blank" rel="noopener">aliveprize.com/apply</a>.</p>
+      </div>
+
+      <footer>
+        <p>Written by Rosario Medina, founder of TheGirlSavedByGrace, for the Alive Prize. The prototype on this page is a demonstration. If you or someone you know is in crisis, call or text 988, or text HOME to 741741.</p>
+        <p>Version note, November 24, 2026: rebuilt to show the mechanism plainly. The company comparisons are gone. The word list, the scoring code, the results table, the trade-offs, the failure modes, and the open questions are new, and the prototype now says when it is unsure instead of guessing. The way the scoring works did not change.</p>
+      </footer>
+
+    </div>
+
+    <script>
+    (function () {
+      "use strict";
+
+      var LEXICON = {
+        grateful: [2.6, "joy"], thankful: [2.4, "joy"], blessed: [2.8, "joy"],
+        happy: [2.7, "joy"], joy: [2.8, "joy"], joyful: [2.9, "joy"],
+        hopeful: [2.4, "hope"], hope: [2.0, "hope"], peace: [2.3, "peace"],
+        peaceful: [2.5, "peace"], calm: [2.0, "peace"], loved: [2.9, "love"],
+        love: [2.4, "love"], excited: [2.6, "joy"], proud: [2.3, "joy"],
+        strong: [1.8, "hope"], better: [1.6, "hope"], good: [1.9, "joy"],
+        great: [2.6, "joy"], amazing: [2.9, "joy"], wonderful: [2.8, "joy"],
+        free: [1.9, "peace"], safe: [2.0, "peace"], supported: [2.2, "love"],
+        understood: [2.0, "love"], healing: [2.1, "hope"], okay: [0.7, "peace"],
+        ok: [0.7, "peace"], fine: [0.6, "peace"], content: [1.8, "peace"],
+        rested: [1.6, "peace"], smiled: [1.9, "joy"], laugh: [2.2, "joy"],
+        laughing: [2.2, "joy"], friends: [1.5, "love"], friend: [1.4, "love"],
+        prayed: [1.4, "faith"], prayer: [1.3, "faith"], faith: [1.6, "faith"],
+        god: [1.1, "faith"], jesus: [1.2, "faith"], church: [1.1, "faith"],
+        worship: [1.5, "faith"], alive: [1.8, "joy"], confident: [2.0, "hope"],
+        motivated: [1.9, "hope"], relieved: [2.1, "peace"], relief: [2.0, "peace"],
+        anxious: [-2.5, "anxiety"], anxiety: [-2.6, "anxiety"], worried: [-2.2, "anxiety"],
+        worry: [-2.2, "anxiety"], panic: [-2.8, "anxiety"], panicking: [-2.8, "anxiety"],
+        scared: [-2.4, "anxiety"], afraid: [-2.4, "anxiety"], nervous: [-2.0, "anxiety"],
+        overwhelmed: [-2.7, "anxiety"], overwhelming: [-2.6, "anxiety"],
+        stressed: [-2.3, "anxiety"], stress: [-2.2, "anxiety"], pressure: [-1.9, "anxiety"],
+        racing: [-1.4, "anxiety"], overthinking: [-2.1, "anxiety"], dread: [-2.5, "anxiety"],
+        sad: [-2.4, "sadness"], depressed: [-2.9, "sadness"], depression: [-2.9, "sadness"],
+        crying: [-2.3, "sadness"], cry: [-2.0, "sadness"], tears: [-2.0, "sadness"],
+        down: [-1.5, "sadness"], unhappy: [-2.4, "sadness"], miserable: [-2.9, "sadness"],
+        hopeless: [-3.1, "sadness"], helpless: [-2.9, "sadness"], empty: [-2.6, "sadness"],
+        numb: [-2.5, "sadness"], dark: [-1.6, "sadness"], darkness: [-2.1, "sadness"],
+        heavy: [-1.8, "sadness"], broken: [-2.7, "sadness"], hurting: [-2.5, "sadness"],
+        hurt: [-2.4, "sadness"], pain: [-2.4, "sadness"], painful: [-2.5, "sadness"],
+        lost: [-2.2, "sadness"], grief: [-2.7, "sadness"], grieving: [-2.7, "sadness"],
+        lonely: [-2.7, "loneliness"], alone: [-2.2, "loneliness"], invisible: [-2.5, "loneliness"],
+        ignored: [-2.3, "loneliness"], rejected: [-2.6, "loneliness"], excluded: [-2.4, "loneliness"],
+        abandoned: [-2.8, "loneliness"], forgotten: [-2.5, "loneliness"], isolated: [-2.5, "loneliness"],
+        worthless: [-3.2, "worth"], useless: [-2.9, "worth"], failure: [-2.6, "worth"],
+        failed: [-2.4, "worth"], fail: [-2.1, "worth"], failing: [-2.4, "worth"],
+        stupid: [-2.3, "worth"], dumb: [-2.2, "worth"], ashamed: [-2.7, "worth"],
+        shame: [-2.6, "worth"], guilty: [-2.3, "worth"], guilt: [-2.3, "worth"],
+        unlovable: [-3.1, "worth"], ugly: [-2.2, "worth"], burden: [-2.4, "worth"],
+        pathetic: [-2.8, "worth"], loser: [-2.7, "worth"], disappointing: [-2.3, "worth"],
+        disappointed: [-2.2, "worth"], behind: [-1.7, "worth"],
+        tired: [-1.4, "exhaustion"], exhausted: [-2.2, "exhaustion"], drained: [-2.3, "exhaustion"],
+        burnt: [-2.3, "exhaustion"], burnout: [-2.5, "exhaustion"], sleepless: [-2.1, "exhaustion"],
+        insomnia: [-2.1, "exhaustion"], nightmare: [-2.4, "exhaustion"], nightmares: [-2.4, "exhaustion"],
+        angry: [-2.3, "anger"], mad: [-1.9, "anger"], frustrated: [-2.1, "anger"],
+        furious: [-2.7, "anger"], annoyed: [-1.7, "anger"],
+        bullied: [-2.9, "hurt"], bullying: [-2.8, "hurt"], trapped: [-2.7, "hurt"],
+        drowning: [-2.8, "hurt"], suffocating: [-2.7, "hurt"], pointless: [-2.9, "sadness"],
+        meaningless: [-2.9, "sadness"], sick: [-1.7, "sadness"]
+      };
+
+      var PHRASES = [
+        ["close to god", 2.5, "faith"], ["close to jesus", 2.5, "faith"],
+        ["answered prayer", 2.6, "faith"], ["good day", 2.0, "joy"],
+        ["great day", 2.6, "joy"], ["falling behind", -2.2, "worth"],
+        ["hate myself", -3.2, "worth"], ["hate my life", -3.0, "sadness"],
+        ["no one cares", -2.9, "loneliness"], ["nobody cares", -2.9, "loneliness"],
+        ["no friends", -2.5, "loneliness"], ["can't sleep", -2.1, "exhaustion"],
+        ["cannot sleep", -2.1, "exhaustion"], ["can't stop crying", -2.8, "sadness"],
+        ["give up", -2.6, "sadness"], ["giving up", -2.6, "sadness"],
+        ["too much", -1.8, "anxiety"], ["falling apart", -2.8, "sadness"],
+        ["on my own", -1.9, "loneliness"], ["all alone", -2.5, "loneliness"],
+        ["not good enough", -2.8, "worth"], ["good enough", 1.9, "worth"],
+        ["proud of myself", 2.5, "joy"], ["made it through", 2.2, "hope"],
+        ["getting better", 1.9, "hope"]
+      ];
+
+      var CRISIS = [
+        "kill myself", "killing myself", "end it all", "end my life",
+        "take my own life", "want to die", "wanna die", "wish i was dead",
+        "wish i were dead", "suicide", "suicidal", "hurt myself",
+        "harm myself", "self harm", "self-harm", "cut myself",
+        "cutting myself", "no reason to live", "don't want to live",
+        "dont want to live", "do not want to live", "better off dead",
+        "better off without me", "no point in living", "not worth living",
+        "don't want to be here", "dont want to be here", "hang myself",
+        "overdose on", "end everything", "want to end it"
+      ];
+
+      var BOOSTERS = { very: 1.3, really: 1.25, so: 1.2, extremely: 1.5, completely: 1.4, totally: 1.3, absolutely: 1.4, incredibly: 1.45, super: 1.3, deeply: 1.3 };
+      var DIMINISHERS = { slightly: 0.65, somewhat: 0.75, kinda: 0.8 };
+      var NEGATORS = { not: 1, no: 1, never: 1, cannot: 1, hardly: 1, without: 1, cant: 1, "can't": 1, dont: 1, "don't": 1, wont: 1, "won't": 1, isnt: 1, "isn't": 1, doesnt: 1, "doesn't": 1, didnt: 1, "didn't": 1 };
+
+      var THEME_LABELS = {
+        anxiety: "anxiety", sadness: "a heavy sadness", loneliness: "loneliness",
+        worth: "feeling like you are not enough", exhaustion: "exhaustion",
+        anger: "anger", hurt: "feeling trapped and hurt", joy: "gratitude and joy",
+        hope: "hope", peace: "peace", love: "feeling loved", faith: "closeness to God"
+      };
+
+      var VERSES = {
+        anxiety: { text: "Cast all your anxiety on him because he cares for you.", ref: "1 Peter 5:7" },
+        sadness: { text: "The Lord is close to the brokenhearted and saves those who are crushed in spirit.", ref: "Psalm 34:18" },
+        loneliness: { text: "Be strong and courageous. Do not be afraid; do not be discouraged, for the Lord your God will be with you wherever you go.", ref: "Joshua 1:9" },
+        worth: { text: "I praise you because I am fearfully and wonderfully made; your works are wonderful, I know that full well.", ref: "Psalm 139:14" },
+        exhaustion: { text: "Come to me, all you who are weary and burdened, and I will give you rest.", ref: "Matthew 11:28" },
+        anger: { text: "Be still, and know that I am God.", ref: "Psalm 46:10" },
+        hurt: { text: "He heals the brokenhearted and binds up their wounds.", ref: "Psalm 147:3" },
+        joy: { text: "This is the day the Lord has made; let us rejoice and be glad in it.", ref: "Psalm 118:24" },
+        hope: { text: "For I know the plans I have for you, declares the Lord, plans to prosper you and not to harm you, plans to give you hope and a future.", ref: "Jeremiah 29:11" },
+        peace: { text: "Peace I leave with you; my peace I give you. Do not let your hearts be troubled and do not be afraid.", ref: "John 14:27" },
+        love: { text: "See what great love the Father has lavished on us, that we should be called children of God.", ref: "1 John 3:1" },
+        faith: { text: "The Lord himself goes before you and will be with you; he will never leave you nor forsake you.", ref: "Deuteronomy 31:8" },
+        generic: { text: "The Lord is close to the brokenhearted and saves those who are crushed in spirit.", ref: "Psalm 34:18" }
+      };
+
+      var STEPS = {
+        anxiety: "Try box breathing for one minute: breathe in for four counts, hold for four, out for four, hold for four. Then name five things you can see. It gives your body proof that this moment is survivable.",
+        sadness: "Do one small physical thing before anything else: drink a glass of water, step outside for two minutes of daylight, or splash cold water on your face. Small and done beats big and planned.",
+        loneliness: "Send one honest text to one person: a friend, a cousin, a youth leader. It does not need to be deep. Something like: today has been hard, can we talk this week?",
+        worth: "Write down one thing you did this week that took effort, however small. A failed test is an event. It is not a verdict on who you are.",
+        exhaustion: "Protect tonight's sleep like it is medicine: phone on charge outside the bed, lights down an hour early, no catch-up scrolling. Rest is not falling behind.",
+        anger: "Before you answer anyone, take a ten minute walk with no phone. Anger often carries a real hurt underneath it, and the walk gives you room to find it.",
+        hurt: "Tell one safe adult what is happening, a parent, a counselor, a coach, a pastor. What is happening to you is not something you should have to carry in secret.",
+        joy: "Write down one specific thing that went right today and why it mattered. Days like this are worth recording, because hard days will try to convince you they never happened.",
+        hope: "Name one small next step you can actually take this week, and put it on your calendar. Hope grows fastest when it has a date attached.",
+        peace: "Keep this moment: sit somewhere quiet for two minutes and breathe slowly. Let a calm day do its work.",
+        love: "Tell one of the people who showed up for you that it mattered. It strengthens the exact thing that carried you today.",
+        faith: "Spend five minutes in prayer or reading one Psalm out loud, slowly. Closeness like today is worth returning to on purpose.",
+        generic: "Pick one small kind thing in the next hour: a glass of water, a short walk, a text to someone you trust. Small steps are still steps."
+      };
+
+      var TESTIMONIES = {
+        anxiety: "a testimony from a student who lived with panic attacks through exam season, and what actually helped her",
+        sadness: "a testimony from a teen who came through a long season of depression and describes the first small things that changed",
+        loneliness: "a testimony from a teen who felt invisible at school for a year, and how one friendship started",
+        worth: "a testimony from a student who failed the class she cared most about, and learned her worth was never the grade",
+        exhaustion: "a testimony from a teen who burned out trying to hold everything together, and learned to rest without guilt",
+        anger: "a testimony from a teen who was angry at everyone, including God, and what honesty did to that anger",
+        hurt: "a testimony from a teen who was bullied and found adults who took it seriously and stood with her",
+        joy: "a prompt to share your own story, because a good day told honestly becomes someone else's hope",
+        hope: "a testimony from a teen whose prayers felt unanswered for months, and what she sees now looking back",
+        peace: "a short reflection on keeping a peaceful heart in a loud season",
+        love: "a testimony about the friend who stayed, and what being loved on an ordinary day can do",
+        faith: "a testimony from a teen whose faith became her own, not just her family's",
+        generic: "a testimony from a teen whose hard season did not get the last word"
+      };
+
+      var OPENERS = {
+        low: "Thank you for writing that honestly. Plenty of teens feel exactly this and never say it out loud. You did, and that matters.",
+        heavy: "Thank you for trusting this space with something this heavy. What you are carrying is real, and you should not have to carry it alone.",
+        steady: "Thank you for checking in honestly. Not every day has a headline. A steady day is still a day worth paying attention to.",
+        encouraged: "That is a genuinely good thing to read. Noticing a good moment, and naming it, is a practice worth keeping.",
+        crisis: ""
+      };
+
+      function analyze(raw) {
+        var norm = " " + raw.toLowerCase().replace(/[‘’]/g, "'").replace(/[^a-z0-9' ]+/g, " ").replace(/\s+/g, " ").trim() + " ";
+        var working = norm;
+        var matches = [];
+        var themes = {};
+        var i, ph, idx;
+
+        for (i = 0; i < PHRASES.length; i++) {
+          ph = PHRASES[i];
+          idx = working.indexOf(" " + ph[0] + " ");
+          while (idx !== -1) {
+            matches.push({ term: ph[0], valence: ph[1], note: "phrase" });
+            themes[ph[2]] = (themes[ph[2]] || 0) + Math.abs(ph[1]);
+            working = working.replace(" " + ph[0] + " ", " ~ ");
+            idx = working.indexOf(" " + ph[0] + " ");
+          }
+        }
+
+        var tokens = working.split(" ").filter(function (t) { return t && t !== "~"; });
+        var wordCount = raw.trim().split(/\s+/).filter(Boolean).length;
+
+        for (i = 0; i < tokens.length; i++) {
+          var w = tokens[i];
+          if (!LEXICON[w]) continue;
+          var base = LEXICON[w][0];
+          var theme = LEXICON[w][1];
+          var val = base;
+          var note = "";
+          var prev = i > 0 ? tokens[i - 1] : "";
+          var prev2 = i > 1 ? tokens[i - 2] : "";
+          if (BOOSTERS[prev]) { val = base * BOOSTERS[prev]; note = "boosted by “" + prev + "”"; }
+          else if (DIMINISHERS[prev]) { val = base * DIMINISHERS[prev]; note = "softened by “" + prev + "”"; }
+          if (NEGATORS[prev] || NEGATORS[prev2]) {
+            val = val * -0.74;
+            note = (note ? note + "; " : "") + "flipped by negation";
+          }
+          matches.push({ term: w, valence: Math.round(val * 100) / 100, note: note });
+          themes[theme] = (themes[theme] || 0) + Math.abs(val);
+        }
+
+        var sum = 0, posSum = 0, negSum = 0;
+        for (i = 0; i < matches.length; i++) {
+          sum += matches[i].valence;
+          if (matches[i].valence >= 0) posSum += matches[i].valence; else negSum += matches[i].valence;
+        }
+        sum = Math.round(sum * 100) / 100;
+        posSum = Math.round(posSum * 100) / 100;
+        negSum = Math.round(negSum * 100) / 100;
+        var compound = sum / Math.sqrt(sum * sum + 15);
+        compound = Math.round(compound * 100) / 100;
+
+        var crisisHits = [];
+        for (i = 0; i < CRISIS.length; i++) {
+          if (norm.indexOf(" " + CRISIS[i] + " ") !== -1 || norm.indexOf(" " + CRISIS[i] + "s ") !== -1) crisisHits.push(CRISIS[i]);
+        }
+
+        var topTheme = null, topWeight = 0;
+        for (var k in themes) { if (themes[k] > topWeight) { topWeight = themes[k]; topTheme = k; } }
+
+        var tier;
+        if (crisisHits.length) tier = "crisis";
+        else if (compound <= -0.45) tier = "heavy";
+        else if (compound <= -0.08) tier = "low";
+        else if (compound < 0.25) tier = "steady";
+        else tier = "encouraged";
+
+        var unsure = !crisisHits.length && (
+          matches.length === 0 ||
+          (posSum >= 1.5 && negSum <= -1.5) ||
+          (posSum + Math.abs(negSum)) < 1.2
+        );
+
+        return {
+          wordCount: wordCount, matches: matches, sum: sum,
+          compound: compound, crisisHits: crisisHits,
+          topTheme: topTheme, tier: tier,
+          posSum: posSum, negSum: negSum, unsure: unsure
+        };
+      }
+
+      var ledgerCount = 0;
+      var prevHash = "00000000";
+
+      function hashStr(s) {
+        var h1 = 0xdeadbeef, h2 = 0x41c6ce57, i, ch;
+        for (i = 0; i < s.length; i++) {
+          ch = s.charCodeAt(i);
+          h1 = Math.imul(h1 ^ ch, 2654435761);
+          h2 = Math.imul(h2 ^ ch, 1597334677);
+        }
+        h1 = Math.imul(h1 ^ (h1 >>> 16), 2246822507) ^ Math.imul(h2 ^ (h2 >>> 13), 3266489909);
+        h2 = Math.imul(h2 ^ (h2 >>> 16), 2246822507) ^ Math.imul(h1 ^ (h1 >>> 13), 3266489909);
+        return ("0000000" + (h2 >>> 0).toString(16)).slice(-8) + ("0000000" + (h1 >>> 0).toString(16)).slice(-8);
+      }
+
+      function matchingFor(r) {
+        var topWeight = 0;
+        for (var i = 0; i < r.matches.length; i++) topWeight += Math.abs(r.matches[i].valence);
+        var similarity;
+        if (!r.topTheme) similarity = 0.41;
+        else similarity = Math.min(0.96, 0.58 + Math.min(0.34, topWeight * 0.045));
+        if (r.tier === "crisis") similarity = Math.min(0.97, similarity + 0.06);
+        var trust = r.tier === "crisis" || r.tier === "heavy" ? 0.94 : 0.88;
+        var combined = Math.round((similarity * 0.7 + trust * 0.3) * 100) / 100;
+        return {
+          similarity: Math.round(similarity * 100) / 100,
+          trust: trust,
+          combined: combined
+        };
+      }
+
+      function scoreWord(c) {
+        if (c <= -0.75) return "deep distress";
+        if (c <= -0.45) return "heavy";
+        if (c <= -0.08) return "low";
+        if (c < 0.25) return "steady";
+        if (c < 0.65) return "encouraged";
+        return "thriving";
+      }
+
+      function routeText(r) {
+        if (r.tier === "crisis") return "crisis protocol, score does not get a say";
+        if (r.unsure) return "unsure, flagged for a person to read, crisis resources shown anyway";
+        if (r.tier === "heavy") return "heavy support, and a person gets offered";
+        if (r.tier === "low") return "gentle support";
+        if (r.tier === "steady") return "steady encouragement";
+        return "encouragement, and an invitation to share the story";
+      }
+
+      function esc(s) {
+        return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+      }
+
+      var input = document.getElementById("feel-input");
+      var hint = document.getElementById("input-hint");
+      var btn = document.getElementById("analyze-btn");
+      var zone = document.getElementById("response-zone");
+      var log = document.getElementById("log");
+      var lastResult = null;
+
+      var SAMPLES = [
+        "idk school is a lot rn. failed my math test and i feel behind everyone. most days i just feel worthless",
+        "today was actually good?? prayed this morning and felt close to god. im grateful for my friends fr",
+        "i dont want to be here anymore. everything feels pointless and i keep thinking i should just end it all",
+        "can't sleep again. my chest feels tight and im just numb all day, like i feel nothing",
+        "idk im fine i guess. kinda numb but also like grateful?? hard to explain"
+      ];
+      var samplesWrap = document.getElementById("sample-list");
+      SAMPLES.forEach(function (s) {
+        var b = document.createElement("button");
+        b.type = "button";
+        b.className = "sample";
+        b.textContent = "“" + s + "”";
+        b.addEventListener("click", function () {
+          input.value = s;
+          hint.textContent = "";
+          runAnalysis();
+        });
+        samplesWrap.appendChild(b);
+      });
+
+      function renderLog(r, rawText, ms) {
+        ledgerCount += 1;
+        var entryHash = hashStr(prevHash + "|" + rawText + "|" + ledgerCount);
+        var idemKey = "idem_" + hashStr(rawText + "|" + r.compound + "|" + r.tier).slice(0, 12);
+        var match = matchingFor(r);
+        var html = "";
+        html += "<div><span class=\"dim\">words read:</span> " + r.wordCount + "</div>";
+        if (r.crisisHits.length) {
+          html += "<div><span class=\"dim\">input check:</span> <span class=\"flag\">flagged, policy rule: risk language present</span> <span class=\"dim\">(prototype: phrase list standing in for the trained check)</span></div>";
+        } else {
+          html += "<div><span class=\"dim\">input check:</span> pass, no risk language found <span class=\"dim\">(prototype: phrase list standing in for the trained check)</span></div>";
+        }
+        html += "<div><span class=\"dim\">score:</span> " + (r.compound >= 0 ? "+" : "") + r.compound.toFixed(2) + " (" + (r.tier === "crisis" ? "set aside by the input check" : scoreWord(r.compound)) + "), raw sum of matched weights " + (r.sum >= 0 ? "+" : "") + r.sum.toFixed(2) + "</div>";
+        if (r.tier === "crisis") {
+          html += "<div><span class=\"dim\">confidence:</span> the score is not trusted here, the flag decides</div>";
+        } else if (r.unsure) {
+          html += "<div><span class=\"dim\">confidence:</span> <span class=\"flag\">low</span>, positive " + (r.posSum >= 0 ? "+" : "") + r.posSum.toFixed(2) + " against negative " + r.negSum.toFixed(2) + ", or too little signal. This run is flagged for a person to read.</div>";
+        } else {
+          html += "<div><span class=\"dim\">confidence:</span> the matched words point one way, positive " + (r.posSum >= 0 ? "+" : "") + r.posSum.toFixed(2) + ", negative " + r.negSum.toFixed(2) + "</div>";
+        }
+        if (r.crisisHits.length) {
+          html += "<div><span class=\"dim\">output check:</span> <span class=\"flag\">personalized reply blocked</span>, crisis resources cleared to show first <span class=\"dim\">(the drafted reply is read against the safety policy before it can be shown)</span></div>";
+        } else if (r.unsure) {
+          html += "<div><span class=\"dim\">output check:</span> pass, reply cleared to show, and the run stays flagged for human review</div>";
+        } else {
+          html += "<div><span class=\"dim\">output check:</span> pass, drafted reply read against the safety policy and cleared to show</div>";
+        }
+        html += "<div><span class=\"dim\">route:</span> " + routeText(r) + "</div>";
+        html += "<div><span class=\"dim\">theme:</span> " + (r.unsure ? "not trusted, the signals point two ways" : (r.topTheme ? THEME_LABELS[r.topTheme] : "none stood out, general response")) + "</div>";
+        if (r.unsure) {
+          html += "<div><span class=\"dim\">matching:</span> held, a person reads the flagged message before any match is offered</div>";
+        } else {
+          html += "<div><span class=\"dim\">matching:</span> similarity " + match.similarity.toFixed(2) + " + trust " + match.trust.toFixed(2) + " (verified credentials and recency) = " + match.combined.toFixed(2) + " <span class=\"dim\">(the teen's side of the match against the professional's side, kept in two parts so either part can be questioned)</span></div>";
+        }
+        html += "<div><span class=\"dim\">log entry:</span> #" + ledgerCount + " append-only, hash " + entryHash + ", prev " + prevHash + ", key " + idemKey + " <span class=\"dim\">(a retry with the same key writes nothing twice)</span></div>";
+        prevHash = entryHash.slice(0, 8);
+        html += "<div><span class=\"dim\">time:</span> " + (ms < 100 ? ms.toFixed(1) : Math.round(ms)) + " ms, start to finish, in this browser</div>";
+
+        html += "<div class=\"mhead\"><span class=\"dim\">words that moved the score:</span></div>";
+        if (r.crisisHits.length) {
+          r.crisisHits.forEach(function (h) {
+            html += "<div class=\"flag\">“" + esc(h) + "” crisis flag</div>";
+          });
+        }
+        if (!r.matches.length && !r.crisisHits.length) {
+          html += "<div>No weighted words matched. The scorer says that instead of guessing, and the reply below says it is unsure.</div>";
+        }
+        var sorted = r.matches.slice().sort(function (a, b) { return Math.abs(b.valence) - Math.abs(a.valence); });
+        sorted.forEach(function (m) {
+          html += "<div>“" + esc(m.term) + "” " + (m.valence >= 0 ? "+" : "") + m.valence.toFixed(2) + (m.note ? " <span class=\"dim\">(" + esc(m.note) + ")</span>" : "") + "</div>";
+        });
+        log.innerHTML = html;
+      }
+
+      var OVERRIDE_OPTIONS = [
+        ["anxiety", "anxious"], ["sadness", "sad"], ["loneliness", "lonely"],
+        ["exhaustion", "worn out"], ["anger", "angry"], ["peace", "at peace"],
+        ["joy", "grateful"]
+      ];
+
+      function overrideBlock() {
+        var btns = "";
+        OVERRIDE_OPTIONS.forEach(function (o) {
+          btns += '<button type="button" class="obtn" data-theme="' + o[0] + '">' + o[1] + "</button>";
+        });
+        return '<div class="rblock"><p class="rlabel">If that read your feeling wrong</p>' +
+          "<p>The score can be wrong. Pick the closer feeling and the reply changes to fit it. The run stays in the log with the original score, so the mistake stays visible.</p>" +
+          '<div class="override-row">' + btns + "</div></div>";
+      }
+
+      function wireOverride(r) {
+        var btns = zone.querySelectorAll(".obtn");
+        for (var i = 0; i < btns.length; i++) {
+          btns[i].addEventListener("click", function () {
+            renderResponse(r, this.getAttribute("data-theme"));
+          });
+        }
+      }
+
+      function renderResponse(r, overrideTheme) {
+        zone.innerHTML = responseHTML(r, overrideTheme);
+        wireOverride(r);
+      }
+
+      function responseHTML(r, overrideTheme) {
+        if (r.tier === "crisis") {
+          var themeLine = r.topTheme ? " Underneath the crisis language, the strongest theme in the words is " + THEME_LABELS[r.topTheme] + "." : "";
+          return "" +
+          '<div class="crisis-panel" role="alert">' +
+            "<h3>Do not go through this moment alone.</h3>" +
+            "<p>What you wrote includes words that can mean someone is thinking about ending their life. In Grace, that stops everything else. Help comes first, content comes later, and a person comes as fast as we can make it happen." + themeLine + "</p>" +
+            '<div class="crisis-actions">' +
+              '<a class="cbtn cbtn-solid" href="tel:988">Call or text 988, Suicide and Crisis Lifeline</a>' +
+              '<a class="cbtn cbtn-line" href="sms:741741?body=HOME">Text HOME to 741741, Crisis Text Line</a>' +
+            "</div>" +
+            "<p>Both are free, confidential, and answered by trained counselors, day and night, in the United States.</p>" +
+            "<p style='margin-top:10px;'><strong>What the full system does next:</strong></p>" +
+            "<ul>" +
+              "<li>The input check flags the words the instant they are read. Nothing is queued in front of it.</li>" +
+              "<li>The output check blocks the personalized reply and clears only the resources above to show first, before any verse, video, or other content.</li>" +
+              "<li>Matching connects the teen to a licensed mental health professional, with a same-day goal for crisis cases. That matching is fourth in the build order in the brief below, and crisis cases go to the front of its line.</li>" +
+              "<li>The run is written once to the append-only log. Its key is in the readout, so a retry cannot create a second match.</li>" +
+            "</ul>" +
+            "<p class='planned-note'>The exact phrases that triggered this are listed in the readout above, so you can see precisely what the detector caught.</p>" +
+          "</div>";
+        }
+
+        if (r.unsure && !overrideTheme) {
+          var gv = VERSES.generic;
+          return '<div class="resp">' +
+            '<p class="msg">Honestly, I am not sure what you are feeling. The words point two ways at once, and I would rather say that than guess wrong and hand you something that does not fit. In the full system, a run like this is flagged for a person to read. Nothing about it is treated as settled.</p>' +
+            '<div class="rblock"><p class="rlabel">Either way, these stay here</p>' +
+              '<p>If any part of what you wrote is about not wanting to be here, skip the rest of this page: call or text <a href="tel:988">988</a>, or text HOME to <a href="sms:741741?body=HOME">741741</a>. The resources show even when the reading is unsure. That is deliberate.</p></div>' +
+            '<div class="rblock"><p class="rlabel">A verse that fits most days</p>' +
+              '<p class="verse-text">“' + esc(gv.text) + '”</p>' +
+              '<p class="verse-ref">' + esc(gv.ref) + "</p></div>" +
+            '<div class="rblock"><p class="rlabel">One small step</p><p>' + esc(STEPS.generic) + "</p></div>" +
+            overrideBlock() +
+          "</div>";
+        }
+
+        var themeKey = overrideTheme || r.topTheme || "generic";
+        var verse = VERSES[themeKey] || VERSES.generic;
+        var themeSentence;
+        if (overrideTheme) {
+          themeSentence = " You set the feeling by hand to " + THEME_LABELS[themeKey] + ", so what follows is chosen for that. The original score stays in the log.";
+        } else if (r.topTheme) {
+          themeSentence = " The strongest thread in what you wrote is " + THEME_LABELS[r.topTheme] + ", so what follows is chosen for that.";
+        } else {
+          themeSentence = " Nothing in the words pointed to one strong theme, so Grace answers gently and keeps the door open.";
+        }
+
+        var opener = r.unsure
+          ? "Since the automatic reading was unsure, this reply follows the feeling you picked."
+          : OPENERS[r.tier];
+
+        var html = '<div class="resp">' +
+          '<p class="msg">' + esc(opener) + themeSentence + "</p>" +
+          '<div class="rblock"><p class="rlabel">A verse for this</p>' +
+            '<p class="verse-text">“' + esc(verse.text) + '”</p>' +
+            '<p class="verse-ref">' + esc(verse.ref) + "</p></div>" +
+          '<div class="rblock"><p class="rlabel">One small step</p><p>' + esc(STEPS[themeKey] || STEPS.generic) + "</p></div>" +
+          '<div class="rblock"><p class="rlabel">Picked for you</p><p>Watch: ' + esc(TESTIMONIES[themeKey] || TESTIMONIES.generic) + ".</p></div>";
+
+        if (r.tier === "heavy") {
+          html += '<div class="rblock"><p class="rlabel">A person, not just content</p>' +
+            "<p>A score this low means content is not enough. In the full system, this is where matching offers a licensed mental health professional. Grace also says it plainly: please tell a trusted adult today. A parent, a school counselor, a pastor.</p>" +
+            '<p class="planned-note">Planned, fourth in the build order below. The routing decision that triggers it is what this prototype shows.</p></div>';
+        }
+        html += overrideBlock();
+        html += "</div>";
+        return html;
+      }
+
+      function runAnalysis() {
+        var text = input.value.trim();
+        if (!text) {
+          hint.textContent = "Write a sentence or two first, or tap one of the samples.";
+          input.focus();
+          return;
+        }
+        hint.textContent = "";
+        var t0 = performance.now();
+        var r = analyze(text);
+        var ms = performance.now() - t0;
+        lastResult = r;
+        renderLog(r, text, ms);
+        renderResponse(r, null);
+        if (window.innerWidth < 700) {
+          zone.scrollIntoView({ block: "nearest" });
+        }
+      }
+
+      btn.addEventListener("click", runAnalysis);
+      input.addEventListener("keydown", function (e) {
+        if ((e.metaKey || e.ctrlKey) && e.key === "Enter") runAnalysis();
+      });
+    })();
+    </script>
+  </body>
+</html>

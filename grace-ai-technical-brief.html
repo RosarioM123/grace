@@ -1,0 +1,302 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<meta name="color-scheme" content="light dark" />
+<link rel="icon" href="data:," />
+<title>Grace AI technical brief</title>
+<style>
+  :root{
+    --bg:#ffffff;
+    --ink:#1c1c1a;
+    --muted:#5a5a55;
+    --line:#d8d8d3;
+    --link:#0b5c4d;
+    --code-bg:#f4f4f1;
+  }
+  @media (prefers-color-scheme: dark){
+    :root{
+      --bg:#161716;
+      --ink:#e9e9e4;
+      --muted:#a3a8a4;
+      --line:#343734;
+      --link:#5ec9b2;
+      --code-bg:#1e201e;
+    }
+  }
+  *{box-sizing:border-box}
+  html{-webkit-text-size-adjust:100%}
+  body{
+    margin:0;
+    background:var(--bg);
+    color:var(--ink);
+    font-family: Georgia, "Iowan Old Style", "Times New Roman", serif;
+    font-size:15px;
+    line-height:1.55;
+  }
+  a{color:var(--link); text-underline-offset:2px}
+  .page{max-width:640px; margin:0 auto; padding:28px 20px 48px}
+
+  .doclabel{font-size:13px; color:var(--muted); margin:0 0 4px}
+  h1{
+    font-size:25px;
+    line-height:1.25;
+    font-weight:700;
+    margin:0 0 10px;
+  }
+  .byline{font-size:14px; color:var(--muted); margin:0 0 2px; line-height:1.5}
+  .byline strong{color:var(--ink)}
+  .contact{font-size:13.5px; margin:6px 0 0}
+  .contact a{margin-right:12px; white-space:nowrap}
+  hr.top{border:0; border-top:1px solid var(--ink); margin:18px 0 0}
+
+  h2{
+    font-size:17px;
+    font-weight:700;
+    line-height:1.3;
+    margin:28px 0 6px;
+  }
+  h2:first-of-type{margin-top:22px}
+  h3{font-size:15px; font-weight:700; margin:16px 0 3px}
+  p{margin:0 0 10px}
+  ul, ol{margin:4px 0 12px; padding-left:20px}
+  li{margin-bottom:4px}
+  li:last-child{margin-bottom:0}
+
+  code, pre, .mono{
+    font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  }
+  pre{
+    background:var(--code-bg);
+    font-size:12.5px;
+    line-height:1.5;
+    padding:10px 12px;
+    margin:10px 0 14px;
+    overflow-x:auto;
+    white-space:pre;
+  }
+  .logline{
+    background:var(--code-bg);
+    font-size:12.5px;
+    line-height:1.55;
+    padding:10px 12px;
+    margin:10px 0 14px;
+    overflow-x:auto;
+    white-space:pre;
+  }
+  .words{
+    font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+    font-size:12.5px;
+    line-height:1.7;
+    margin:8px 0 14px;
+  }
+
+  table.results{
+    width:100%;
+    border-collapse:collapse;
+    font-size:13px;
+    line-height:1.45;
+    margin:10px 0 14px;
+  }
+  table.results th, table.results td{
+    text-align:left;
+    vertical-align:top;
+    padding:6px 8px 6px 0;
+    border-bottom:1px solid var(--line);
+  }
+  table.results thead th{font-weight:700; border-bottom:1px solid var(--ink)}
+  table.results td.num, table.results th.num{font-family: ui-monospace, Menlo, Consolas, monospace; font-size:12.5px; white-space:nowrap}
+  @media (max-width:560px){
+    table.results, table.results thead, table.results tbody, table.results tr, table.results th, table.results td{display:block; width:100%}
+    table.results thead{display:none}
+    table.results td{border-bottom:0; padding:1px 0}
+    table.results tr{border-bottom:1px solid var(--line); padding:6px 0}
+  }
+
+  .help{
+    border-top:1px solid var(--ink);
+    margin-top:32px;
+    padding-top:12px;
+  }
+  .help h2{margin-top:0}
+  .help .nums{font-size:15px; font-weight:700; line-height:1.5}
+  .help .nums span{display:block; margin-bottom:3px}
+
+  footer{
+    margin-top:28px;
+    padding-top:10px;
+    border-top:1px solid var(--line);
+    font-size:12.5px;
+    color:var(--muted);
+    line-height:1.55;
+  }
+  footer a{color:var(--muted)}
+  .version{margin-top:8px; font-style:italic}
+
+  @media print{
+    .page{padding:0; max-width:none}
+    body{font-size:11.5pt}
+    a{color:var(--ink); text-decoration:none}
+    pre, .logline{background:none; border:1px solid var(--line)}
+  }
+</style>
+</head>
+<body>
+<main class="page">
+
+  <p class="doclabel">TheGirlSavedByGrace, technical brief for the Alive Prize</p>
+  <h1>Grace: what exists, what I am planning to build, and the order I would build it in</h1>
+
+  <p class="byline"><strong>Rosario Medina</strong>, Fordham University, Gabelli School of Business. B.S. Finance with a Computer Science minor. Sophomore, GPA 3.80, graduating December 2028.</p>
+  <p class="contact">
+    <a href="https://rosariom123.github.io/grace" target="_blank" rel="noopener">rosariom123.github.io/grace</a>
+    <a href="https://github.com/RosarioM123" target="_blank" rel="noopener">github.com/RosarioM123</a>
+    <a href="https://www.linkedin.com/in/rosariom123" target="_blank" rel="noopener">LinkedIn</a>
+  </p>
+
+  <hr class="top">
+
+  <h2>Why I started this</h2>
+  <p>I started TheGirlSavedByGrace in January 2020. I was 14. It came out of a rough stretch of my own: depression, anxiety, a lot of loneliness, and the way my Christian faith got me through it. I wrote for other teenagers who were in that same place and did not have anyone saying anything honest to them. That has not changed.</p>
+  <p>Since 2020 it has reached over 200,000 teenagers across 100 countries. I have used that figure in my PIMCO and BMO applications and it is the figure in the Grace business plan, so I am keeping it consistent here. The business plan also cites the wider numbers: 47 percent of Gen Z report mental health challenges, and youth suicide rose 62 percent between 2007 and 2021.</p>
+  <p>The audience is there. What is missing is any way to respond to one teenager, at the moment they write something, instead of publishing the same page for everyone.</p>
+
+  <h2>What Grace is today</h2>
+  <p>Today Grace is a static HTML site at rosariom123.github.io/grace. It holds the writing, the testimonies, and the community. There is no backend behind it. No login, no database, no code that reads what a visitor types.</p>
+  <p><strong>The AI is planned. It is not built.</strong> It lives in the business plan. The live site has no AI in it. The $100,000 is what would build it, in the order described below. The only working piece is a small browser prototype I wrote to test the reading logic, and this page shows its actual code and its actual outputs so the mechanism is not a claim.</p>
+
+  <h2>How it would work</h2>
+  <p>A teenager opens Grace and writes how they are feeling, in their own words, in a free text box. There is no form with dropdowns and no score they can see themselves performing for. The writing is the input. A crisis check runs on that text before anything else is shown. If it flags, it overrides whatever response was going to appear and points the teenager to staffed help straight away: call or text 988, or text HOME to 741741. If there is no flag, the sentiment read decides the next screen: a testimony or video that fits what they wrote, a verse or prayer, or a concrete coping step. Where a teenager needs more than content, the system would match them to a licensed mental health professional. The target I am working to is plain: a teenager in crisis reaches a licensed professional the same day.</p>
+  <p>Stack from the business plan: ReactJS on the front end, MySQL for the database, hosted on AWS EC2, with spaCy and NLTK for the language work.</p>
+
+  <h2>The word list</h2>
+  <p>The prototype does not use a model. It uses a word list I wrote by hand: 24 words, each with a weight between -1 and +1. The score for a message is the average of the weights of the words it contains. Part of the list, exactly as written:</p>
+  <p class="words">hopeless -0.9 &nbsp; alone -0.8 &nbsp; numb -0.7 &nbsp; lonely -0.7 &nbsp; panic -0.7<br>
+  anxious -0.6 &nbsp; overwhelmed -0.6 &nbsp; sad -0.5 &nbsp; crying -0.5 &nbsp; tired -0.3<br>
+  grateful +0.8 &nbsp; thankful +0.8 &nbsp; hopeful +0.7 &nbsp; loved +0.7 &nbsp; calm +0.5</p>
+  <p>The trade-off is stated plainly: a hand-written list runs in the browser with no server and anyone can read exactly why a message scored the way it did, and I gave up accuracy to get that. Teenagers write in slang, misspellings, and sentences where one word reverses another. A 24-word list misses most of that, which is why the production system uses spaCy and NLTK instead. The list exists to test the routing logic, not to ship.</p>
+  <p>The lookup itself, shortened only by showing 5 of the 24 entries:</p>
+<pre>const LEXICON = { hopeless: -0.9, alone: -0.8, numb: -0.7,
+                  tired: -0.3, grateful: 0.8 }; // 5 of 24 entries
+const CRISIS = ["hurt myself", "hurting myself",
+                "want to die", "end it all"];
+
+function readMessage(text) {
+  const lower = text.toLowerCase();
+  const words = lower.split(/[^a-z']+/);
+  const hits = words.filter(w =&gt; w in LEXICON);
+  const score = hits.length
+    ? hits.reduce((s, w) =&gt; s + LEXICON[w], 0) / hits.length
+    : 0;
+  const crisis = CRISIS.some(p =&gt; lower.includes(p));
+  return { score, hits, crisis };
+  // crisis is returned separately and checked before
+  // the score is allowed to route anything
+}</pre>
+
+  <h2>What the prototype does on real phrases</h2>
+  <p>These are the five test phrases I run against the prototype, written the way teenagers actually type, and the outputs the code above produces on them. Nothing here is rounded into a nicer story.</p>
+  <table class="results">
+    <thead>
+      <tr><th scope="col">What they typed</th><th scope="col" class="num">Score</th><th scope="col">Route</th><th scope="col">Words matched</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>idk i just feel numb</td>
+        <td class="num">-0.70</td>
+        <td>Content: testimony and a coping step</td>
+        <td class="num">numb -0.7</td>
+      </tr>
+      <tr>
+        <td>cant sleep again my chest feels tight im so anxious</td>
+        <td class="num">-0.60</td>
+        <td>Content: verse or prayer, breathing step</td>
+        <td class="num">anxious -0.6</td>
+      </tr>
+      <tr>
+        <td>i dont want to be here anymore i keep thinking about hurting myself</td>
+        <td class="num">0.00</td>
+        <td>Crisis protocol, overrides the score</td>
+        <td class="num">phrase: "hurting myself"</td>
+      </tr>
+      <tr>
+        <td>feeling grateful today, church was good and i actually feel hopeful</td>
+        <td class="num">+0.75</td>
+        <td>Content: testimony to share, community prompt</td>
+        <td class="num">grateful +0.8, hopeful +0.7</td>
+      </tr>
+      <tr>
+        <td>im fine i guess, just tired and whatever</td>
+        <td class="num">-0.10</td>
+        <td>Unsure. See below.</td>
+        <td class="num">fine +0.1, tired -0.3</td>
+      </tr>
+    </tbody>
+  </table>
+  <p>Two things in that table are worth noticing. The crisis phrase scores 0.00 on sentiment because none of its words are in the list, and it still routes to the crisis protocol, because the crisis check does not depend on the score. And the last phrase is a case the system cannot read: "fine" and "tired" nearly cancel out, and the honest answer is that the words do not say enough. In that case the page says it is not sure, in plain words rather than as an error, shows the crisis resources anyway, and flags the message for a human to review. A system that always sounds certain about a teenager's feelings would be lying some of the time. I would rather it admit the gap.</p>
+
+  <h2>The safety layer</h2>
+  <p>My decision: two separate checks instead of one. One check reads the teenager's message as it comes in, against a written safety policy that names what counts as risk language. A second check reads the response before it is shown, against the same policy. A flag from either one overrides the personalized response. Before any version ships, I run a set of crisis messages I wrote to try to break it, phrased the ways teenagers actually phrase them, including the ones that do not use obvious words. The version only ships if it catches them.</p>
+  <p>What I gave up: a second check costs time on every message and doubles the surface that can produce a false alarm. I accepted that because the failure in the other direction is worse. If the input check misses a crisis message, the output check is a second chance to catch it, and the resources are printed on every page of the site regardless, so a miss does not leave a teenager with nothing. If the check flags a message that was not a crisis, the cost is that a teenager sees helpline numbers they did not need, which is annoying and not dangerous.</p>
+  <p>Releases get scored before they go live on five things: sentiment accuracy, crisis recall (how many real crisis messages the system catches), crisis false-positive rate, response safety, and latency. Each one gets its threshold set in advance, with the clinicians reviewing the system, and if any one of them is crossed, that version does not ship until it is fixed. I am not publishing threshold numbers here because they get set with those clinicians, not guessed in advance by me.</p>
+
+  <h2>How matching works</h2>
+  <p>Matching a teenager to a professional is two lists compared, not one search. One side holds the teenager's signals: what they are feeling, the language they wrote in, faith preference, availability, and how urgent it is. The other side holds the professional's: specialty, language, faith background, availability, and verified credentials. Each side is turned into a vector, the match score starts from how close the two vectors are, and then a trust term is added on top, weighted by verified credentials and how recent the professional's activity is. Safety is not a filter applied after the ranking. It is inside the ranking, because a close match to an unverified person is not a good match.</p>
+  <p>The trade-off: a scored match is harder to explain than a simple rule like "first available." When a teenager asks why they got this person, I owe them an answer, so the system has to be able to show the two or three signals that drove the match in plain words. And if the match is wrong, because sometimes it will be, the teenager can ask for a different professional with one tap, without explaining themselves again.</p>
+
+  <h2>The log</h2>
+  <p>Every interaction is written once to a log that only ever gets appended to, never edited. Every action carries an idempotency key, a unique string generated when the action is first attempted, so if a phone retries a request on a bad connection, the retry is recognized and the teenager is not matched twice or sent the same message twice. One entry, in the format I use:</p>
+  <p class="logline">{ "id": "evt_1042", "key": "9f2c-req-771", "prev": "a41b", "hash": "sha256:7d3e...", "route": "crisis", "score": 0.00 }</p>
+  <p>Each entry stores the hash of the entry before it, so the chain breaks visibly if anything is altered later. This is a pattern I have already built for myself. WORLD, a deterministic state engine I wrote, keeps a SHA-256 hash-chained intent ledger and validates every state transition against capacity, liquidity, and node-lock constraints before it commits. The Grace log reuses that design: hash-chained entries, validation before commit, no silent overwrites. What I gave up is storage and simplicity. An append-only log grows forever and makes deleting a record a deliberate, visible act instead of a quiet one. For records about teenagers in crisis, I think that is the right side to err on.</p>
+
+  <h2>What I would build first, in order</h2>
+  <ol>
+    <li>The sentiment read, because everything downstream needs a feeling to work from. Matching has nothing to match on without it.</li>
+    <li>The crisis check and the responses that go with it, because it has to be live and tested before any teenager sees a generated response. This is also where most of the risk sits, so it gets built while there is still time to fix it.</li>
+    <li>Matching to licensed professionals, because it depends on the first two working: it routes by feeling, and a crisis match follows different rules from a content match.</li>
+    <li>Scale last: a bigger content library, a wider professional network, and measuring whether any of it helps. I have not put dollar amounts against each step here because the plan I have does not split the $100,000 that way, and I would rather leave it unsplit than invent a breakdown.</li>
+  </ol>
+  <p>On personalization specifically: a new way of matching content to a feeling ships to a small group first, gets measured against the current version on engagement and on whether teenagers actually reach a professional, and only rolls out to everyone if the numbers justify it. If an experiment cannot show a difference, the current version stays.</p>
+
+  <h2>What could go wrong</h2>
+  <p><strong>Missing a crisis message.</strong> This is the risk that matters most. Teenagers do not always use the words a policy expects. The mitigations are the ones above: two checks instead of one, a red-team set written in real phrasing, crisis resources printed on every page so a miss is contained, and the unsure state routing to a human instead of guessing.</p>
+  <p><strong>Matching to the wrong professional.</strong> A bad match at a bad moment can close a teenager off from asking again. The trust term keeps unverified professionals out of the top of the ranking, and the one-tap request for someone different means a wrong match is recoverable in seconds, not a dead end.</p>
+  <p><strong>Teenagers not trusting a system with their feelings.</strong> This one is not fully solvable with engineering. What I can do: no account required to write something, the score is never shown to the teenager as a grade on how they feel, and the page is honest that a person, not the system, is the point of the matching step. If the sentiment read is wrong, the teenager sees content for the wrong feeling, so every response page also shows a simple way to pick a different feeling manually. The read is a suggestion, never a lock.</p>
+
+  <h2>Open questions</h2>
+  <p>Three things I have not decided, and I am not going to pretend otherwise in a funding document. First, whether matching should weight faith background above or below specialty. Grace is a faith-based community, so faith matters to the teenagers using it, but a closer specialty match may matter more in a crisis. I will test both orderings and let the outcomes decide. Second, whether the crisis check should run on the whole conversation or only the latest message. The whole conversation catches slow build-ups; the latest message is faster and easier to reason about. Third, how long interaction logs should be kept. The append-only design argues for keeping them; the fact that they are teenagers' words argues for a short retention window with a clear deletion date. That decision needs a clinician and a lawyer in the room, not just me.</p>
+
+  <h2>Work I have already shipped</h2>
+  <h3>Relay</h3>
+  <p>Relay took 1st place at the MongoDB Hackathon in New York in September 2026. It is an autonomous agent that migrates code. It keeps code history, dependency graphs, patches, test outputs, and error logs in MongoDB Atlas across long runs, generates a change, runs the tests, reads the failures, and changes its approach based on what came back. Python, MongoDB Atlas, SQLite. I bring it up here for a specific reason: Grace needs the same habit. Keep the full record, test against it, let the results decide the next step instead of guessing.</p>
+  <h3>Willett Advisors</h3>
+  <p>At Willett I taught myself to code in six weeks and built a tool my team used for research. It cut research time by 20 percent, roughly 8 to 10 hours a week. Separately I automated how portfolio data was pulled together across more than 1,000 data points, which cut manual reporting time by 80 percent. That tool is internal, so there is no public code I can link to. The numbers are the record I have.</p>
+  <h3>BACKED</h3>
+  <p>BACKED, a community investing platform I built with a five-person team in HTML, CSS, and vanilla JavaScript, took 1st place at the Capital One Tech Summit Hackathon in May 2025.</p>
+  <h3>The longer record</h3>
+  <p>When I was nine a car accident left me with a permanent physical disability. I did more than 520 strength training sessions over five years, twice a week, to relearn how to walk. Grace has run for six years on the same pattern. Show up. Do the work again.</p>
+  <p>Other recognition, for the record: the NCWIT Aspirations in Computing Collegiate Award, where I was 1 of 80 selected from more than 5,000 applicants; a Grow with Google Scholarship; SEO; Girls Who Invest; the Hispanic Scholarship Fund; AAAIM; and the Most Powerful Women in Banking Young Women's Leadership Award. More than 50 scholarships and awards in total.</p>
+
+  <h2>How I built this</h2>
+  <p>I wrote the prototype described on this page in an evening, to check whether the routing logic held up before writing about it in the application. The word list is hand-written, all 24 words, and so are the five test phrases, which are modeled on how teenagers in the Grace community actually write, with anything identifying removed. The scoring and the crisis check are the code shown above, running in the browser with no server call. What is not hand-written is the plan around it: the stack, the matching design, and the build order come from the Grace business plan, and the system they describe is not built yet.</p>
+
+  <div class="help">
+    <h2>If you need help now</h2>
+    <p>These are the services the crisis check in the plan points to. They are staffed and they are free.</p>
+    <p class="nums">
+      <span>988 Suicide and Crisis Lifeline: call or text 988</span>
+      <span>Crisis Text Line: text HOME to 741741</span>
+    </p>
+  </div>
+
+  <footer>
+    TheGirlSavedByGrace, founded January 2020 by Rosario Medina. Written for the Alive Prize.
+    <br>
+    <a href="https://github.com/RosarioM123" target="_blank" rel="noopener">GitHub</a> &nbsp; <a href="https://rosariom123.github.io/grace" target="_blank" rel="noopener">Grace site</a> &nbsp; <a href="https://www.linkedin.com/in/rosariom123" target="_blank" rel="noopener">LinkedIn</a>
+    <p class="version">Version note: rebuilt Nov 24, 2026 to show the mechanism plainly. The word list, the code, the test outputs, and the open questions are new in this version. The engineering sections were rewritten as my own design decisions, with the trade-offs stated.</p>
+  </footer>
+
+</main>
+</body>
+</html>
